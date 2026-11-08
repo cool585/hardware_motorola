@@ -13,7 +13,6 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.os.PowerManager
-import android.os.PowerManager.WakeLock
 import android.os.UserHandle
 import android.util.Log
 import org.lineageos.settings.device.MotoActionsSettings
@@ -31,8 +30,6 @@ class DozePulse(
 ) : UpdatedStateNotifier {
 
     private val powerManager: PowerManager = context.getSystemService(PowerManager::class.java)
-    private val wakeLock: WakeLock =
-        powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$TAG:WakeLock")
     private val flatUpSensor: Sensor = sensorHelper.getSensor(SENSOR_TYPE_MMI_FLAT_UP)!!
     private val stowSensor: Sensor = sensorHelper.getSensor(SENSOR_TYPE_MMI_STOW)!!
 
@@ -46,17 +43,6 @@ class DozePulse(
 
     fun onScreenStateChanged(screenOn: Boolean) {
         Log.d(TAG, "onScreenStateChanged($screenOn)")
-        if (!wakeLock.isHeld) {
-            if (screenOn) {
-                wakeLock.acquire()
-                Log.d(TAG, "Acquire")
-            }
-        } else {
-            if (!screenOn) {
-                wakeLock.release()
-                Log.d(TAG, "Release")
-            }
-        }
 
         if (screenOn) {
             Log.d(TAG, "Disabling")
